@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111111">
+<title>Vertex Logistics</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--bk:#111;--mid:#666;--lt:#aaa;--bd:#ddd;--bg:#f3f3f3;--cd:#fff;--ac:#d4891a;--gn:#2e7d32;--rd:#c62828;--bl:#1565c0;--r:10px;--sh:0 2px 10px rgba(0,0,0,.07);}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--bk);display:flex;flex-direction:column;}
+#app{display:flex;flex-direction:column;height:100%;}
+.vlogo{background-size:contain;background-repeat:no-repeat;background-position:center;display:inline-block;}
+.topbar{background:var(--bk);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:max(10px,env(safe-area-inset-top));}
+.topbar-logo{width:40px;height:32px;flex-shrink:0;}
+.tbt{font-size:14px;font-weight:800;color:#fff;}.tbs{font-size:9px;color:rgba(255,255,255,.5);}
+.tbr{margin-left:auto;}
+.pill{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 11px;border-radius:14px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;}
+.dot{width:6px;height:6px;border-radius:50%;background:#4caf50;flex-shrink:0;}
+.dot.off{background:#f44336;}.dot.bl{background:var(--ac);animation:bl 1s infinite;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.2;}}
+#cnt{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.bnav{background:#fff;border-top:1px solid var(--bd);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
+.bt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;cursor:pointer;gap:2px;border:none;background:none;color:var(--lt);}
+.bt.active{color:var(--bk);}
+.bti{font-size:19px;line-height:1;}.btl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.pg{display:none;padding:12px;padding-bottom:80px;}
+.pg.active{display:block;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.sc{background:var(--cd);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh);border-left:3px solid var(--bk);}
+.sc.g{border-left-color:var(--gn);}.sc.b{border-left-color:var(--bl);}.sc.o{border-left-color:var(--ac);}
+.sl{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+.sv{font-size:23px;font-weight:900;color:var(--bk);line-height:1.1;margin-top:2px;}
+.card{background:var(--cd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;}
+.ch{background:var(--bk);color:#fff;padding:9px 13px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;}
+.chb{background:rgba(255,255,255,.15);border:none;color:#fff;padding:4px 11px;border-radius:11px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;}
+.fg{display:grid;gap:8px;}
+.f1{grid-template-columns:1fr;}.f2{grid-template-columns:1fr 1fr;}.f3{grid-template-columns:1fr 1fr 1fr;}
+.fd{display:flex;flex-direction:column;gap:3px;}
+.fd label{font-size:9px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.3px;}
+.fd input,.fd select,.fd textarea{border:1.5px solid var(--bd);border-radius:7px;padding:9px 10px;font-size:13px;background:#fafafa;color:var(--bk);font-family:inherit;outline:none;width:100%;-webkit-appearance:none;transition:border-color .18s;}
+.fd input:focus,.fd select:focus{border-color:var(--bk);background:#fff;}
+.fd input.ed{background:#fffde8;border-color:var(--ac);font-weight:800;font-size:15px;text-align:center;}
+.fd textarea{min-height:50px;resize:vertical;}
+.bw{background:var(--bk);border-radius:var(--r);padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:11px;}
+.bw-logo{width:44px;height:36px;flex-shrink:0;}
+.bwt{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.7px;}
+.bwn{font-size:24px;font-weight:900;color:#fff;letter-spacing:1px;line-height:1.1;}
+.br{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 12px;background:#f7f7f7;border-top:1px solid #eee;}
+.btn{padding:11px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;text-transform:uppercase;letter-spacing:.3px;transition:opacity .15s;width:100%;}
+.btn:active{opacity:.75;}.bf{grid-column:1/-1;}
+.bk2{background:var(--bk);color:#fff;}.bg2{background:var(--gn);color:#fff;}
+.bb{background:var(--bl);color:#fff;}.bo{background:var(--ac);color:#fff;}
+.br2{background:var(--rd);color:#fff;}.bm{background:var(--mid);color:#fff;}
+.dl{padding:0;}
+.di{padding:10px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:9px;}
+.di:last-child{border-bottom:none;}
+.dnb{width:40px;height:40px;border-radius:8px;background:#f0f0f0;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.dnh{font-size:7px;color:var(--mid);line-height:1;font-weight:700;}.dnn{font-size:12px;font-weight:900;line-height:1;color:var(--bk);}
+.di2{flex:1;min-width:0;}
+.di2 .t{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.di2 .m{font-size:10px;color:var(--mid);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.di2 .b{font-size:9px;color:var(--lt);margin-top:1px;}
+.ar{display:flex;gap:6px;padding:7px 12px;background:#f9f9f9;border-top:1px solid #f0f0f0;}
+.ab{flex:1;padding:7px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;}
+.aag{background:#e8f5e9;color:var(--gn);}.abl{background:#e3f0ff;color:var(--bl);}.ard{background:#fde8e8;color:var(--rd);}
+.sw{padding:9px 11px;background:#f7f7f7;border-bottom:1px solid #eee;}
+.si{width:100%;padding:9px 13px;border:1.5px solid var(--bd);border-radius:18px;font-size:13px;outline:none;font-family:inherit;background:#fff;}
+.si:focus{border-color:var(--bk);}
+.pag{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;border-top:1px solid #eee;}
+.pb{padding:5px 13px;border-radius:6px;border:1.5px solid #ddd;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--bk);}
+.pb:disabled{opacity:.3;cursor:default;}.pi{font-size:10px;color:var(--mid);font-weight:600;}
+.ss{background:var(--cd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;}
+.sh2{background:#f7f7f7;padding:10px 14px;font-size:10px;font-weight:800;color:var(--bk);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;}
+.sb{padding:13px 14px;}
+.cst{padding:9px 12px;border-radius:7px;font-size:11px;font-weight:700;margin-top:8px;display:block;}
+.cso{background:#e8f5e9;color:#1b5e20;}.csf{background:#fde8e8;color:#b71c1c;}
+.ib{border-radius:8px;padding:10px;font-size:11px;line-height:1.7;margin-bottom:10px;}
+.ia{background:#fff8e8;border:1px solid #f0a500;}
+#toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%) translateY(14px);z-index:9999;background:var(--bk);color:#fff;padding:8px 16px;border-radius:18px;font-size:12px;font-weight:700;opacity:0;transition:all .25s;max-width:85vw;text-align:center;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.s{background:var(--gn);}#toast.e{background:var(--rd);}#toast.i{background:#333;}
+.ldr{display:flex;align-items:center;justify-content:center;padding:28px;gap:8px;color:var(--mid);font-size:12px;}
+.sp{width:16px;height:16px;border:2px solid #ddd;border-top-color:var(--bk);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.emp{text-align:center;padding:30px 16px;color:var(--mid);}
+.empi{font-size:34px;margin-bottom:8px;}.empp{font-size:12px;line-height:1.6;}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.mbg.open{display:flex;}
+.mo{background:#fff;border-radius:var(--r) var(--r) 0 0;padding:18px;width:100%;max-width:480px;padding-bottom:max(18px,env(safe-area-inset-bottom));}
+.mo h3{font-size:14px;font-weight:800;color:var(--bk);margin-bottom:5px;}
+.mo p{font-size:12px;color:var(--mid);margin-bottom:14px;line-height:1.5;}
+.mob{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+#ov.hidden{display:none;}
+.ob{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:430px;}
+.ob-lw{display:flex;justify-content:center;margin-bottom:10px;}
+.ob-logo{width:80px;height:64px;}
+.ob h2{font-size:16px;font-weight:900;color:var(--bk);text-align:center;margin-bottom:3px;}
+.ob .sub{font-size:11px;color:var(--mid);text-align:center;margin-bottom:16px;line-height:1.5;}
+/* LR PRINT */
+.lrp{font-family:'Arial',sans-serif;font-size:9px;color:#000;background:#fff;border:2px solid #666;width:100%;margin:0 auto;}
+.lrp-hdr{display:grid;grid-template-columns:1fr 175px 168px;border-bottom:2px solid #666;}
+.lrp-logo-cell{padding:8px 16px;border-right:2px solid #666;display:flex;align-items:center;justify-content:flex-start;gap:14px;}
+.lrp-logo-row{display:flex;align-items:center;gap:8px;}
+.lrp-logo-img{width:38px;height:104px;flex-shrink:0;background-size:contain;background-repeat:no-repeat;background-position:center;}
+.lrp-co-text{display:flex;flex-direction:column;justify-content:center;min-width:0;flex-shrink:0;}
+.lrp-co-name{font-size:24px;font-weight:900;color:#000;letter-spacing:-0.3px;line-height:1.05;white-space:nowrap;}
+.lrp-co-sub{font-size:10px;color:#222;margin-top:3px;white-space:nowrap;}
+.lrp-contact{padding:8px 8px;border-right:2px solid #666;font-size:8px;line-height:1.85;color:#000;font-weight:600;text-align:center;display:flex;flex-direction:column;justify-content:center;}
+.lrp-ref-cell{display:flex;flex-direction:column;}
+.lrp-ref-row{flex:1;display:grid;grid-template-columns:80px 1fr;border-bottom:1.5px solid #666;}
+.lrp-ref-row:last-child{border-bottom:none;}
+.lrp-ref-lbl{padding:5px 5px;font-size:7.6px;font-weight:800;color:#000;display:flex;align-items:center;border-right:1.5px solid #666;white-space:nowrap;}
+.lrp-ref-val{padding:5px 6px;font-size:9.5px;font-weight:900;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lrp-copy{background:#f0f0f0;border-bottom:2px solid #666;padding:4px 10px;font-size:8.5px;font-weight:600;text-align:center;text-transform:uppercase;letter-spacing:1.5px;color:#333;}
+.lrp-party{display:grid;grid-template-columns:1fr 165px 1fr;border-bottom:2px solid #666;min-height:85px;}
+.lrp-pc{padding:6px 10px;}
+.lrp-pc:nth-child(2){border-left:2px solid #666;border-right:2px solid #666;}
+.lrp-plbl{font-size:12px;font-weight:900;text-decoration:underline;text-transform:uppercase;margin-bottom:5px;}
+.lrp-pval{font-size:11px;font-weight:700;min-height:24px;}
+.lrp-rl{font-size:10px;font-weight:800;text-transform:uppercase;margin-bottom:2px;}
+.lrp-rv{font-size:11px;font-weight:700;min-height:18px;margin-bottom:5px;}
+.lrp-gh{display:grid;grid-template-columns:48px 65px 1fr 90px 1fr;border-bottom:2px solid #666;background:#f5f5f5;}
+.lrp-gh div{padding:5px 7px;font-size:9px;font-weight:800;text-transform:uppercase;text-align:center;border-right:2px solid #666;}
+.lrp-gh div:last-child{border-right:none;padding:0;}
+.lrp-gb{display:grid;grid-template-columns:48px 65px 1fr 90px 1fr;min-height:230px;border-bottom:2px solid #666;}
+.lrp-gc{padding:6px 7px;font-size:10px;border-right:2px solid #666;}
+.lrp-gv{color:#000;font-weight:700;}
+.lrp-gc:last-child{border-right:none;padding:0;}
+.lrp-ir{display:flex;flex-direction:column;height:100%;}
+.lrp-irow{flex:1;border-bottom:1px solid #bbb;padding:5px 7px;display:flex;flex-direction:column;}
+.lrp-irow:last-child{border-bottom:none;}
+.lrp-ilbl{font-size:8.5px;font-weight:800;color:#000;text-transform:uppercase;margin-bottom:2px;}
+.lrp-ival{font-size:10px;font-weight:700;min-height:14px;color:#000;}
+.lrp-ghsplit{display:flex;align-items:stretch;width:100%;height:100%;}
+.lrp-ghs-l{flex:1;display:flex;align-items:center;padding:5px 7px;text-align:left;}
+.lrp-ghs-r{width:100px;flex-shrink:0;border-left:2px solid #666;display:flex;align-items:center;justify-content:center;padding:5px 4px;text-align:center;}
+.lrp-infocell{display:flex;padding:0!important;}
+.lrp-infocell .lrp-ir{flex:1;}
+.lrp-sigcol{width:100px;flex-shrink:0;border-left:2px solid #666;}
+.lrp-terms{padding:10px 14px;background:#fff;}
+.lrp-tt{font-size:9px;font-weight:900;text-decoration:underline;text-transform:uppercase;margin-bottom:4px;color:#000;}
+.lrp-tg{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.lrp-ti{font-size:8px;color:#333;line-height:1.65;margin-bottom:4px;}
+/* BILL PRINT */
+.bp{font-family:'Arial',sans-serif;font-size:10px;color:#000;background:#fff;border:1.5px solid #888;width:100%;margin:0 auto;overflow:hidden;}
+.bp-bar{height:7px;background:#1565c0;}
+.bph{display:flex;align-items:center;gap:18px;padding:18px 18px 14px;}
+.bph-logo{width:42px;height:115px;flex-shrink:0;background-size:contain;background-repeat:no-repeat;background-position:center;}
+.bpco{flex:1;text-align:center;}.bpcn{font-size:27px;font-weight:900;line-height:1.05;letter-spacing:-0.3px;}
+.bpcs{font-size:11px;color:#222;text-decoration:underline;margin-top:3px;font-weight:600;}
+.bpca{font-size:9px;color:#222;line-height:1.55;margin-top:4px;}
+.bpcp{font-size:9.5px;color:#000;font-weight:700;margin-top:2px;}
+.bphr{margin:0 16px;border-top:1.5px solid #333;}
+.bptag{text-align:center;font-size:10px;font-weight:700;font-style:italic;color:#333;padding:10px 13px 14px;}
+.bptr{display:grid;grid-template-columns:1fr auto;padding:6px 13px;border-bottom:1.5px solid #888;gap:10px;}
+.bpml{font-size:8.5px;font-weight:800;color:#555;text-transform:uppercase;margin-bottom:2px;}
+.bpmv{font-size:11px;font-weight:700;min-height:18px;border-bottom:1px solid #999;}
+.bprf{display:flex;flex-direction:column;gap:4px;min-width:135px;}
+.bprr{display:grid;grid-template-columns:58px 1fr;gap:3px;align-items:center;}
+.bprl{font-size:8.5px;font-weight:800;color:#555;}.bprv{font-size:11px;font-weight:800;border-bottom:1px solid #999;min-height:16px;}
+.bptbl{width:100%;border-collapse:collapse;}
+.bptbl th{background:#f0f0f0;font-size:9.5px;font-weight:800;text-transform:uppercase;padding:9px 7px;border:1px solid #888;text-align:center;}
+.bptbl td{font-size:10.5px;padding:9px 7px;border:1px solid #ddd;vertical-align:top;height:14px;}
+.bptbl td.c{text-align:center;}.bptbl td.r{text-align:right;}
+.bptbl .str td{background:#f7f7f7;font-weight:700;}
+.bptbl .ttr td{background:#f0f0f0;font-weight:900;font-size:10.5px;}
+.bpft{padding:16px 16px;border-top:1.5px solid #888;display:grid;grid-template-columns:1fr auto;gap:10px;}
+.bpbk{font-size:9.5px;line-height:2.1;color:#333;}.bpbk strong{color:#000;}
+.bpnt{font-size:7.5px;color:#666;margin-top:3px;font-style:italic;}
+.bpsg{text-align:right;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;gap:18px;}
+.bpsl{border-top:1px solid #999;font-size:8px;color:#555;padding-top:3px;min-width:110px;text-align:center;}
+@page{size:portrait;margin:8mm;}
+@media print{
+  html,body{overflow:visible!important;height:auto!important;background:#fff!important;width:auto!important;margin:0!important;}
+  .topbar,.bnav,#toast,.mbg,#ov,.pg:not(#page-print),.ch,.pc,.br,.sw,.ar,.pag{display:none!important;}
+  #page-print{display:block!important;padding:0!important;max-width:none!important;margin:0!important;}
+  #page-print .card{border:none!important;box-shadow:none!important;border-radius:0!important;background:transparent!important;max-width:none!important;margin:0!important;}
+  .pw{padding:0!important;overflow:visible!important;}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+  .lrp,.bp{border-color:#666!important;box-shadow:none!important;width:100%!important;}
+}
+@media(min-width:600px){
+  .sg{grid-template-columns:repeat(4,1fr);}
+  .pg{padding:16px;max-width:720px;margin:0 auto;padding-bottom:86px;}
+  .mo{border-radius:var(--r);margin-bottom:74px;}
+  .mbg{align-items:center;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="topbar">
+  <div class="vlogo topbar-logo"></div>
+  <div><div class="tbt">Vertex Logistics</div><div class="tbs">LR &amp; Bill System</div></div>
+  <div class="tbr"><button class="pill" id="sync-btn"><div class="dot off" id="sdot"></div><span id="slbl">Offline</span></button></div>
+</div>
+<div id="cnt">
+<div class="pg active" id="page-dashboard">
+  <div class="sg">
+    <div class="sc"><div class="sl">Total LRs</div><div class="sv" id="d1">-</div></div>
+    <div class="sc g"><div class="sl">Today LRs</div><div class="sv" id="d2">-</div></div>
+    <div class="sc b"><div class="sl">Total Bills</div><div class="sv" id="d3">-</div></div>
+    <div class="sc o"><div class="sl">Next LR No.</div><div class="sv" id="d4">-</div></div>
+  </div>
+  <div class="card"><div class="ch">Recent LRs <button class="chb" id="dash-new-lr">+ New LR</button></div><div id="rlr"><div class="ldr"><div class="sp"></div>Loading...</div></div></div>
+  <div class="card"><div class="ch">Recent Bills <button class="chb" id="dash-new-bill">+ New Bill</button></div><div id="rbill"><div class="ldr"><div class="sp"></div>Loading...</div></div></div>
+</div>
+<div class="pg" id="page-lr">
+  <div class="bw"><div class="vlogo bw-logo"></div><div><div class="bwt">Lorry Receipt</div><div class="bwn" id="lrbdg">LR # -</div></div></div>
+  <div class="card"><div class="ch">LR Details</div><div style="padding:12px 14px"><div class="fg f2">
+    <div class="fd"><label>LR Number (editable)</label><input id="lr-no" class="ed" placeholder="001" inputmode="numeric"></div>
+    <div class="fd"><label>Date</label><input type="date" id="lr-dt"></div>
+    <div class="fd"><label>Vehicle Number *</label><input id="lr-vh" placeholder="GJ01AB1234" style="text-transform:uppercase" list="dl-vh"><datalist id="dl-vh"></datalist></div>
+    <div class="fd"><label>Sales Invoice No.</label><input id="lr-inv" placeholder="INV-001"></div>
+  </div></div></div>
+  <div class="card"><div class="ch">Party &amp; Route</div><div style="padding:12px 14px">
+    <div class="fg f1">
+      <div class="fd"><label>Consignor (Sender) *</label><input id="lr-cr" placeholder="Sender name" list="dl-cr" autocomplete="off"><datalist id="dl-cr"></datalist></div>
+      <div class="fd"><label>Consignee (Receiver) *</label><input id="lr-ce" placeholder="Receiver name" list="dl-ce" autocomplete="off"><datalist id="dl-ce"></datalist></div>
+    </div>
+    <div class="fg f2" style="margin-top:8px">
+      <div class="fd"><label>Origin *</label><input id="lr-og" placeholder="From city" list="dl-c1"><datalist id="dl-c1"></datalist></div>
+      <div class="fd"><label>Destination *</label><input id="lr-ds" placeholder="To city" list="dl-c2"><datalist id="dl-c2"></datalist></div>
+      <div class="fd"><label>Delivery Location</label><input id="lr-dl" placeholder="Delivery address"></div>
+      <div class="fd"><label>GST Paid By</label><select id="lr-gst"><option value="">- Select -</option><option>Consignor</option><option>Consignee</option><option>Transport Co.</option><option>RCM</option></select></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="ch">Goods Details</div><div style="padding:12px 14px">
+    <div class="fg f3">
+      <div class="fd"><label>Qty *</label><input type="number" id="lr-qt" placeholder="0" inputmode="numeric"></div>
+      <div class="fd"><label>Unit</label><input id="lr-un" placeholder="Bags/Boxes/Nos" list="dl-un"><datalist id="dl-un"><option value="Bags"><option value="Boxes"><option value="Nos"><option value="Bundles"><option value="Rolls"><option value="Pallets"></datalist></div>
+      <div class="fd"><label>Total Weight</label><input id="lr-wt" placeholder="500 Kg"></div>
+    </div>
+    <div class="fg f1" style="margin-top:8px"><div class="fd"><label>Description of Goods *</label><input id="lr-dc" placeholder="e.g. Electronic Goods, Cement Bags..."></div></div>
+  </div></div>
+  <div class="card"><div class="ch">Freight Details</div><div style="padding:12px 14px"><div class="fg f1">
+    <div class="fd"><label>Freight Details</label><input id="lr-fr" placeholder="e.g. Rs.5000 / To Pay / Paid"></div>
+    <div class="fd"><label>Consignee Acknowledgement</label><textarea id="lr-ak" placeholder="Any note..."></textarea></div>
+  </div></div>
+  <div class="br">
+    <button class="btn bk2" id="lr-new-btn">+ New LR</button>
+    <button class="btn bg2" id="lr-sv">Save LR</button>
+    <button class="btn bo bf" id="lr-svpr">Save &amp; Print LR</button>
+  </div></div>
+</div>
+<div class="pg" id="page-bill">
+  <div class="bw"><div class="vlogo bw-logo"></div><div><div class="bwt">Bill / Invoice</div><div class="bwn" id="billbdg">BILL # -</div></div></div>
+  <div class="card"><div class="ch">Bill Details</div><div style="padding:12px 14px">
+    <div class="fg f2">
+      <div class="fd"><label>Bill Number (editable)</label><input id="bill-no" class="ed" placeholder="016" inputmode="numeric"></div>
+      <div class="fd"><label>Date</label><input type="date" id="bill-dt"></div>
+    </div>
+    <div class="fg f1" style="margin-top:8px"><div class="fd"><label>M/S. (Bill To) *</label><input id="bill-ms" placeholder="Party name / company"></div></div>
+  </div></div>
+  <div class="card"><div class="ch">LR Entries <button class="chb" id="add-row-btn">+ Add Row</button></div>
+    <div style="padding:12px 14px"><div id="bill-rows"></div></div>
+    <div class="br">
+      <button class="btn bk2" id="bill-new-btn">+ New Bill</button>
+      <button class="btn bg2" id="bill-sv">Save Bill</button>
+      <button class="btn bo bf" id="bill-svpr">Save &amp; Print Bill</button>
+    </div>
+  </div>
+</div>
+<div class="pg" id="page-records">
+  <div class="card">
+    <div class="ch">Records<div style="display:flex;gap:5px"><button class="chb" id="rt-lr" style="background:rgba(255,255,255,.3)">LRs</button><button class="chb" id="rt-bill">Bills</button></div></div>
+    <div class="sw"><input type="search" class="si" id="rq" placeholder="Search LR No, Name, Vehicle, City..."></div>
+    <div id="rec-list"><div class="ldr"><div class="sp"></div>Loading...</div></div>
+    <div id="rec-pag" class="pag" style="display:none"><button class="pb" id="pg-prev">Prev</button><span class="pi" id="pg-info"></span><button class="pb" id="pg-next">Next</button></div>
+    <div style="display:flex;gap:7px;padding:9px 11px;background:#f7f7f7;border-top:1px solid #eee">
+      <button class="btn bg2" style="flex:1" id="rec-new-lr">+ LR</button>
+      <button class="btn bb" style="flex:1" id="rec-new-bill">+ Bill</button>
+      <button class="btn bm" style="flex:1" id="exp-csv-btn">Export CSV</button>
+    </div>
+  </div>
+</div>
+<div class="pg" id="page-print">
+  <div class="card"><div class="ch">Print Document</div>
+    <div class="pc" style="padding:10px 12px">
+      <div style="display:flex;gap:7px;margin-bottom:8px">
+        <select id="pt" style="flex:1;padding:9px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none;"><option value="LR">LR (Lorry Receipt)</option><option value="BILL">Bill / Invoice</option></select>
+        <select id="ps" style="flex:2;padding:9px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none;"><option value="">- Select Document -</option></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        <button class="btn bb" id="preview-btn">Preview</button>
+        <button class="btn bk2" id="print-btn">Print</button>
+      </div>
+    </div>
+    <div class="pw" id="pw" style="padding:12px;overflow-x:auto;"><div class="emp"><div class="empi">&#128424;</div><p class="empp">Select a document to preview.</p></div></div>
+  </div>
+</div>
+<div class="pg" id="page-settings">
+  <div class="ss"><div class="sh2">Firebase Connection</div><div class="sb">
+    <div class="ib ia">Enter 4 keys from: Firebase Console - Project Settings - Your Apps - Web app</div>
+    <div class="fg f1">
+      <div class="fd"><label>API Key</label><input id="fb-k" placeholder="AIzaSy..." autocomplete="off"></div>
+      <div class="fd"><label>Auth Domain</label><input id="fb-d" placeholder="your-app.firebaseapp.com" autocomplete="off"></div>
+      <div class="fd"><label>Project ID</label><input id="fb-p" placeholder="your-project-id" autocomplete="off"></div>
+      <div class="fd"><label>App ID</label><input id="fb-a" placeholder="1:xxx:web:xxx" autocomplete="off"></div>
+    </div>
+    <span id="fb-st" style="display:none" class="cst"></span>
+  </div>
+  <div class="br"><button class="btn bb" id="test-fb-btn">Test &amp; Save</button><button class="btn bm" id="sync-now-btn">Sync Now</button></div></div>
+  <div class="ss"><div class="sh2">Company Details</div><div class="sb"><div class="fg f1">
+    <div class="fd"><label>Company Name</label><input id="s-nm" value="Vertex Logistics"></div>
+    <div class="fd"><label>Sub-title</label><input id="s-sb" value="Fleet owner &amp; Logistics service all over India"></div>
+    <div class="fd"><label>Address</label><input id="s-ad" value="C-324 Bijal Business Center, Nr Radhe Business, Aslali, Ahmedabad-382427"></div>
+    <div class="fg f2"><div class="fd"><label>Mobile 1</label><input id="s-m1" value="98259 35041"></div><div class="fd"><label>Mobile 2</label><input id="s-m2" value="98253 25041"></div></div>
+    <div class="fd"><label>Email</label><input id="s-em" value="vertexlogisticsahm@gmail.com"></div>
+    <div class="fg f2"><div class="fd"><label>PAN No.</label><input id="s-pn" value="KTCPS7149F"></div><div class="fd"><label>Starting LR No.</label><input type="number" id="s-lr" value="1"></div></div>
+    <div class="fd"><label>Starting Bill No.</label><input type="number" id="s-bl" value="16"></div>
+    <div class="fg f2"><div class="fd"><label>Bank Name</label><input id="s-bk" value="Axis Bank"></div><div class="fd"><label>Account No.</label><input id="s-ac" value="920020057588963"></div></div>
+    <div class="fd"><label>IFSC Code</label><input id="s-if" value="UTIB0000298"></div>
+  </div></div><div class="br"><button class="btn bk2 bf" id="save-comp-btn">Save Settings</button></div></div>
+</div>
+</div>
+<nav class="bnav">
+  <button class="bt active" id="tab-dashboard"><div class="bti">&#128202;</div><div class="btl">Home</div></button>
+  <button class="bt" id="tab-lr"><div class="bti">&#128666;</div><div class="btl">New LR</div></button>
+  <button class="bt" id="tab-bill"><div class="bti">&#129534;</div><div class="btl">New Bill</div></button>
+  <button class="bt" id="tab-records"><div class="bti">&#128452;</div><div class="btl">Records</div></button>
+  <button class="bt" id="tab-print"><div class="bti">&#128424;</div><div class="btl">Print</div></button>
+  <button class="bt" id="tab-settings"><div class="bti">&#9881;</div><div class="btl">Settings</div></button>
+</nav>
+</div>
+<div id="ov">
+  <div class="ob">
+    <div class="ob-lw"><div class="vlogo ob-logo"></div></div>
+    <h2>Vertex Logistics</h2>
+    <p class="sub">LR &amp; Bill Management System<br>Enter Firebase keys to get started</p>
+    <div class="ib ia">Get 4 keys: Firebase Console - Project Settings - Your Apps - Web app</div>
+    <div class="fg f1">
+      <div class="fd"><label>API Key</label><input id="ov-k" placeholder="AIzaSy..." autocomplete="off"></div>
+      <div class="fd"><label>Auth Domain</label><input id="ov-d" placeholder="your-app.firebaseapp.com" autocomplete="off"></div>
+      <div class="fd"><label>Project ID</label><input id="ov-p" placeholder="your-project-id" autocomplete="off"></div>
+      <div class="fd"><label>App ID</label><input id="ov-a" placeholder="1:xxx:web:xxx" autocomplete="off"></div>
+    </div>
+    <span id="ov-st" style="display:none" class="cst"></span>
+    <button class="btn bk2 bf" style="margin-top:12px" id="ov-connect-btn">Connect &amp; Start</button>
+    <p style="text-align:center;margin-top:10px;font-size:10px;color:var(--mid)">Make sure Firestore Database is created in Firebase Console first</p>
+  </div>
+</div>
+<div id="toast"></div>
+<div class="mbg" id="mbg">
+  <div class="mo"><h3 id="mt">Confirm</h3><p id="mm">Are you sure?</p>
+    <div class="mob"><button class="btn bm" id="mo-cancel">Cancel</button><button class="btn br2" id="mo-ok">Delete</button></div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var LOGO_B64='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAJ7AOcDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooo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';
+function applyLogos(root){(root||document).querySelectorAll('.vlogo').forEach(function(el){el.style.backgroundImage="url('"+LOGO_B64+"')";});}
+var LS={g:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},s:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+var CFG=LS.g('vtxA',{apiKey:'',authDomain:'',projectId:'',appId:'',name:'Vertex Logistics',sub:'Fleet owner & Logistics service all over India',addr:'C-324 Bijal Business Center, Nr Radhe Business, Aslali, Ahmedabad-382427',m1:'98259 35041',m2:'98253 25041',email:'vertexlogisticsahm@gmail.com',pan:'KTCPS7149F',bank:'Axis Bank',acc:'920020057588963',ifsc:'UTIB0000298',startLR:1,startBill:16});
+var db=null,lrC=null,billC=null,LRS=[],BILLS=[],CLR=null,CBILL=null,mLR=0,mBill=0,saving=false,eLRId=null,eBId=null,recTab='LR',recPg=0,RPG=25,moCallback=null;
+function ge(id){return document.getElementById(id);}
+function initFB(c){try{var app=firebase.initializeApp({apiKey:c.apiKey,authDomain:c.authDomain,projectId:c.projectId,appId:c.appId},'vtx-'+Date.now());db=firebase.firestore(app);lrC=db.collection('lorry_receipts');billC=db.collection('bills');return true;}catch(e){console.error('FB:',e);return false;}}
+function loadAll(msg){if(!db){offUI();return;}setSd('bl');if(msg)toast('Loading...','i');Promise.all([lrC.orderBy('lrNo','desc').get(),billC.orderBy('billNo','desc').get()]).then(function(res){LRS=res[0].docs.map(function(d){var x=d.data();x.id=d.id;return x;});BILLS=res[1].docs.map(function(d){var x=d.data();x.id=d.id;return x;});mLR=LRS.length?LRS[0].lrNo:CFG.startLR-1;chkFY();setSd('ok');renderDash();renderRec();renderPSel();updateAC();if(msg)toast('Synced','s');}).catch(function(e){setSd('off');toast('Error: '+e.message,'e');});}
+function chkFY(){if(!BILLS.length){mBill=CFG.startBill-1;return;}mBill=BILLS[0].billNo;var ld=new Date(BILLS[0].date||BILLS[0].savedAt||Date.now());if(getFY(ld)<getFY(new Date())){mBill=0;toast('New Financial Year - Bill no resets to 001','i');}}
+function getFY(d){return d.getMonth()>=3?d.getFullYear():d.getFullYear()-1;}
+function doConnect(cfg,sid){if(!cfg.apiKey||!cfg.projectId){setCS(sid,false,'Fill all 4 fields');return;}toast('Connecting...','i');if(!initFB(cfg)){setCS(sid,false,'Firebase init failed');return;}lrC.limit(1).get().then(function(){Object.assign(CFG,cfg);LS.s('vtxA',CFG);setCS(sid,true,'Connected!');ge('ov').classList.add('hidden');syncSUI();toast('Connected!','s');loadAll(false);}).catch(function(e){setCS(sid,false,'Failed: '+e.message);toast('Failed: '+e.message,'e');});}
+function showPage(id){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.bt').forEach(function(t){t.classList.remove('active');});ge('page-'+id).classList.add('active');var tab=ge('tab-'+id);if(tab)tab.classList.add('active');ge('cnt').scrollTop=0;if(id==='records')renderRec();if(id==='print')renderPSel();if(id==='settings')loadSUI();if(id==='dashboard')renderDash();}
+function newDoc(type){if(type==='LR'){clrLR();eLRId=null;CLR=mLR+1;ge('lr-no').value=p3(CLR);ge('lrbdg').textContent='LR # '+p3(CLR);ge('lr-dt').value=toDay();ge('lr-sv').textContent='Save LR';showPage('lr');if(!db)toast('Connect Firebase in Settings first','e');else toast('LR #'+p3(CLR)+' ready','i');}else{clrBill();eBId=null;CBILL=mBill+1;ge('bill-no').value=p3(CBILL);ge('billbdg').textContent='BILL # '+p3(CBILL);ge('bill-dt').value=toDay();ge('bill-sv').textContent='Save Bill';initRows();showPage('bill');if(!db)toast('Connect Firebase in Settings first','e');else toast('Bill #'+p3(CBILL)+' ready','i');}}
+function clrLR(){['lr-vh','lr-inv','lr-cr','lr-ce','lr-og','lr-ds','lr-dl','lr-qt','lr-un','lr-wt','lr-dc','lr-fr','lr-ak'].forEach(function(id){var e=ge(id);if(e)e.value='';});ge('lr-gst').value='';}
+function clrBill(){var e=ge('bill-ms');if(e)e.value='';}
+function gLR(){function v(id){var e=ge(id);return e?e.value.trim():'';}return{lrNo:CLR,lrNoFmt:p3(CLR),date:v('lr-dt'),vehicle:v('lr-vh').toUpperCase(),invoice:v('lr-inv'),consignor:v('lr-cr'),consignee:v('lr-ce'),origin:v('lr-og'),dest:v('lr-ds'),delivery:v('lr-dl'),gstby:ge('lr-gst').value,qty:v('lr-qt'),unit:v('lr-un'),weight:v('lr-wt'),desc:v('lr-dc'),freight:v('lr-fr'),ack:v('lr-ak'),savedAt:new Date().toISOString()};}
+function saveLR(quiet){if(!db){toast('Connect Firebase first','e');return Promise.resolve(false);}if(saving)return Promise.resolve(false);var d=gLR();if(!d.consignor||!d.consignee){toast('Consignor and Consignee required','e');return Promise.resolve(false);}if(!d.vehicle){toast('Vehicle number required','e');return Promise.resolve(false);}if(!d.desc){toast('Description required','e');return Promise.resolve(false);}saving=true;var b=ge('lr-sv');b.textContent='Saving...';b.disabled=true;var p;if(eLRId){p=lrC.doc(eLRId).set(d).then(function(){var i=LRS.findIndex(function(r){return r.id===eLRId;});if(i>-1)LRS[i]=Object.assign({id:eLRId},d);});}else{p=lrC.add(d).then(function(r){LRS.unshift(Object.assign({id:r.id},d));mLR=Math.max(mLR,d.lrNo);});}return p.then(function(){setSd('ok');if(!quiet)toast('LR #'+d.lrNoFmt+' saved','s');renderDash();updateAC();eLRId=null;CLR=mLR+1;clrLR();ge('lr-no').value=p3(CLR);ge('lrbdg').textContent='LR # '+p3(CLR);ge('lr-dt').value=toDay();b.textContent='Save LR';return d;}).catch(function(e){toast('Save failed: '+e.message,'e');setSd('off');return false;}).finally(function(){saving=false;b.textContent='Save LR';b.disabled=false;});}
+function initRows(){ge('bill-rows').innerHTML='';addBillRow();}
+function addBillRow(){var wrap=ge('bill-rows');var idx=wrap.children.length;var div=document.createElement('div');div.style.cssText='border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:9px;font-weight:800;color:#666;text-transform:uppercase">Row '+(idx+1)+'</span>'+(idx>0?'<button class="rm-row" style="background:#fde8e8;color:#c62828;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">Remove</button>':'')+'</div><div class="fg f2"><div class="fd"><label>LR No.</label><input class="r-lr" placeholder="001"></div><div class="fd"><label>Date</label><input type="date" class="r-dt"></div><div class="fd"><label>Vehicle No.</label><input class="r-vh" placeholder="GJ01AB1234" style="text-transform:uppercase"></div><div class="fd"><label>From</label><input class="r-fr" placeholder="Origin"></div><div class="fd"><label>To</label><input class="r-to" placeholder="Destination"></div><div class="fd"><label>No. of Articles</label><input class="r-ar" placeholder="0" inputmode="numeric"></div><div class="fd"><label>Loading/Unloading Charges</label><input type="number" class="r-ch" placeholder="0.00"></div><div class="fd"><label>Amount (Rs.)</label><input type="number" class="r-am" placeholder="0.00"></div></div>';wrap.appendChild(div);if(idx>0)div.querySelector('.rm-row').addEventListener('click',function(){div.remove();});}
+function getBillRows(){return Array.from(document.querySelectorAll('#bill-rows > div')).map(function(div){return{lrno:(div.querySelector('.r-lr')||{}).value||'',date:(div.querySelector('.r-dt')||{}).value||'',vehicle:((div.querySelector('.r-vh')||{}).value||'').toUpperCase(),from:(div.querySelector('.r-fr')||{}).value||'',to:(div.querySelector('.r-to')||{}).value||'',articles:(div.querySelector('.r-ar')||{}).value||'',charges:(div.querySelector('.r-ch')||{}).value||'',amount:(div.querySelector('.r-am')||{}).value||''};});}
+function getBillData(){function v(id){var e=ge(id);return e?e.value.trim():'';}var rows=getBillRows();var total=rows.reduce(function(s,r){return s+(parseFloat(r.amount)||0);},0);return{billNo:CBILL,billNoFmt:p3(CBILL),date:v('bill-dt'),ms:v('bill-ms'),rows:rows,total:total.toFixed(2),savedAt:new Date().toISOString()};}
+function saveBill(quiet){if(!db){toast('Connect Firebase first','e');return Promise.resolve(false);}if(saving)return Promise.resolve(false);var d=getBillData();if(!d.ms){toast('M/S. required','e');return Promise.resolve(false);}saving=true;var b=ge('bill-sv');b.textContent='Saving...';b.disabled=true;var p;if(eBId){p=billC.doc(eBId).set(d).then(function(){var i=BILLS.findIndex(function(x){return x.id===eBId;});if(i>-1)BILLS[i]=Object.assign({id:eBId},d);});}else{p=billC.add(d).then(function(r){BILLS.unshift(Object.assign({id:r.id},d));mBill=Math.max(mBill,d.billNo);});}return p.then(function(){setSd('ok');if(!quiet)toast('Bill #'+d.billNoFmt+' saved','s');renderDash();eBId=null;CBILL=mBill+1;clrBill();initRows();ge('bill-no').value=p3(CBILL);ge('billbdg').textContent='BILL # '+p3(CBILL);ge('bill-dt').value=toDay();b.textContent='Save Bill';return d;}).catch(function(e){toast('Save failed: '+e.message,'e');setSd('off');return false;}).finally(function(){saving=false;b.textContent='Save Bill';b.disabled=false;});}
+function renderDash(){var t=toDay();setText('d1',LRS.length);setText('d2',LRS.filter(function(r){return r.date===t;}).length);setText('d3',BILLS.length);setText('d4',p3(mLR+1));ge('rlr').innerHTML=LRS.slice(0,8).length?'<div class="dl">'+LRS.slice(0,8).map(function(r){return'<div class="di"><div class="dnb"><div class="dnh">LR</div><div class="dnn">'+p3(r.lrNo)+'</div></div><div class="di2"><div class="t">'+esc(r.consignor||'-')+'</div><div class="m">to '+esc(r.consignee||'-')+'</div><div class="b">'+esc(r.origin||'')+' to '+esc(r.dest||'')+' | '+esc(r.vehicle||'')+' | '+fd(r.date)+'</div></div><button class="ab aag" data-plr="'+r.lrNo+'" style="flex-shrink:0;padding:6px 9px;font-size:10px">Print</button></div>';}).join('')+'</div>':'<div class="emp"><div class="empi">&#128666;</div><p class="empp">No LRs yet.</p></div>';ge('rbill').innerHTML=BILLS.slice(0,5).length?'<div class="dl">'+BILLS.slice(0,5).map(function(b){return'<div class="di"><div class="dnb"><div class="dnh">BILL</div><div class="dnn">'+p3(b.billNo)+'</div></div><div class="di2"><div class="t">'+esc(b.ms||'-')+'</div><div class="m">'+(b.rows?b.rows.length:0)+' entries | Rs.'+fn(b.total)+'</div><div class="b">'+fd(b.date)+'</div></div><button class="ab aag" data-pbill="'+b.billNo+'" style="flex-shrink:0;padding:6px 9px;font-size:10px">Print</button></div>';}).join('')+'</div>':'<div class="emp"><div class="empi">&#129534;</div><p class="empp">No Bills yet.</p></div>';}
+function offUI(){['rlr','rbill'].forEach(function(id){ge(id).innerHTML='<div class="emp"><div class="empi">&#9889;</div><p class="empp">Not connected. Go to Settings.</p></div>';});['d1','d2','d3','d4'].forEach(function(id){setText(id,'-');});setSd('off');}
+function renderRec(){var q=ge('rq')?ge('rq').value.toLowerCase():'';var src=recTab==='LR'?LRS:BILLS;var fl=q?src.filter(function(r){return String(r.lrNo||r.billNo||'').indexOf(q)>-1||(r.consignor||r.ms||'').toLowerCase().indexOf(q)>-1||(r.consignee||'').toLowerCase().indexOf(q)>-1||(r.vehicle||'').toLowerCase().indexOf(q)>-1||(r.origin||'').toLowerCase().indexOf(q)>-1||(r.dest||'').toLowerCase().indexOf(q)>-1;}):src;var tot=fl.length,start=recPg*RPG,pg=fl.slice(start,Math.min(start+RPG,tot));var wrap=ge('rec-list');if(!pg.length){wrap.innerHTML='<div class="emp"><div class="empi">'+(q?'&#128269;':'&#128451;')+'</div><p class="empp">'+(q?'No match.':'No '+recTab+'s saved.')+'</p></div>';ge('rec-pag').style.display='none';return;}if(recTab==='LR'){wrap.innerHTML='<div class="dl">'+pg.map(function(r){return'<div><div class="di"><div class="dnb"><div class="dnh">LR</div><div class="dnn">'+p3(r.lrNo)+'</div></div><div class="di2"><div class="t">'+esc(r.consignor||'-')+'</div><div class="m">to '+esc(r.consignee||'-')+' | '+fd(r.date)+'</div><div class="b">'+esc(r.origin||'')+' to '+esc(r.dest||'')+' | '+esc(r.vehicle||'')+'</div></div></div><div class="ar"><button class="ab aag" data-plr="'+r.lrNo+'">Print</button><button class="ab abl" data-elr="'+r.id+'">Edit</button><button class="ab ard" data-dlr="'+r.id+'" data-dnum="'+r.lrNo+'">Delete</button></div></div>';}).join('')+'</div>';}else{wrap.innerHTML='<div class="dl">'+pg.map(function(b){return'<div><div class="di"><div class="dnb"><div class="dnh">BILL</div><div class="dnn">'+p3(b.billNo)+'</div></div><div class="di2"><div class="t">'+esc(b.ms||'-')+'</div><div class="m">'+(b.rows?b.rows.length:0)+' entries | Rs.'+fn(b.total)+'</div><div class="b">'+fd(b.date)+'</div></div></div><div class="ar"><button class="ab aag" data-pbill="'+b.billNo+'">Print</button><button class="ab abl" data-ebill="'+b.id+'">Edit</button><button class="ab ard" data-dbill="'+b.id+'" data-dnum="'+b.billNo+'">Delete</button></div></div>';}).join('')+'</div>';}var tp=Math.ceil(tot/RPG);if(tp>1){ge('rec-pag').style.display='flex';ge('pg-info').textContent='Page '+(recPg+1)+'/'+tp+' ('+tot+')';ge('pg-prev').disabled=recPg===0;ge('pg-next').disabled=recPg>=tp-1;}else ge('rec-pag').style.display='none';}
+function edLR(id){var r=LRS.find(function(x){return x.id===id;});if(!r)return;eLRId=id;CLR=r.lrNo;function fv(eid,val){var e=ge(eid);if(e)e.value=val||'';}fv('lr-no',p3(r.lrNo));fv('lr-dt',r.date);fv('lr-vh',r.vehicle);fv('lr-inv',r.invoice);fv('lr-cr',r.consignor);fv('lr-ce',r.consignee);fv('lr-og',r.origin);fv('lr-ds',r.dest);fv('lr-dl',r.delivery);fv('lr-qt',r.qty);fv('lr-un',r.unit);fv('lr-wt',r.weight);fv('lr-dc',r.desc);fv('lr-fr',r.freight);fv('lr-ak',r.ack);ge('lr-gst').value=r.gstby||'';ge('lrbdg').textContent='LR # '+p3(r.lrNo);ge('lr-sv').textContent='Update LR';showPage('lr');toast('Editing LR #'+p3(r.lrNo),'i');}
+function edBill(id){var b=BILLS.find(function(x){return x.id===id;});if(!b)return;eBId=id;CBILL=b.billNo;function fv(eid,val){var e=ge(eid);if(e)e.value=val||'';}fv('bill-no',p3(b.billNo));fv('bill-dt',b.date);fv('bill-ms',b.ms);ge('billbdg').textContent='BILL # '+p3(b.billNo);var wrap=ge('bill-rows');wrap.innerHTML='';(b.rows||[{}]).forEach(function(row,idx){var div=document.createElement('div');div.style.cssText='border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:9px;font-weight:800;color:#666;text-transform:uppercase">Row '+(idx+1)+'</span>'+(idx>0?'<button class="rm-row" style="background:#fde8e8;color:#c62828;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">Remove</button>':'')+'</div><div class="fg f2"><div class="fd"><label>LR No.</label><input class="r-lr" value="'+esc(row.lrno||'')+'"></div><div class="fd"><label>Date</label><input type="date" class="r-dt" value="'+esc(row.date||'')+'"></div><div class="fd"><label>Vehicle No.</label><input class="r-vh" value="'+esc(row.vehicle||'')+'"></div><div class="fd"><label>From</label><input class="r-fr" value="'+esc(row.from||'')+'"></div><div class="fd"><label>To</label><input class="r-to" value="'+esc(row.to||'')+'"></div><div class="fd"><label>No. of Articles</label><input class="r-ar" value="'+esc(row.articles||'')+'"></div><div class="fd"><label>Loading/Unloading Charges</label><input type="number" class="r-ch" value="'+esc(row.charges||'')+'"></div><div class="fd"><label>Amount (Rs.)</label><input type="number" class="r-am" value="'+esc(row.amount||'')+'"></div></div>';wrap.appendChild(div);if(idx>0)div.querySelector('.rm-row').addEventListener('click',function(){div.remove();});});ge('bill-sv').textContent='Update Bill';showPage('bill');toast('Editing Bill #'+p3(b.billNo),'i');}
+function delDoc(type,id,num){showMo('Delete '+type+' #'+p3(num),'This will be permanently deleted.',function(){var col=type==='LR'?lrC:billC;col.doc(id).delete().then(function(){if(type==='LR'){LRS=LRS.filter(function(r){return r.id!==id;});mLR=LRS.length?LRS[0].lrNo:CFG.startLR-1;}else{BILLS=BILLS.filter(function(b){return b.id!==id;});mBill=BILLS.length?BILLS[0].billNo:CFG.startBill-1;}renderDash();renderRec();toast(type+' #'+p3(num)+' deleted','i');}).catch(function(e){toast('Delete failed','e');});});}
+function expCSV(){var src=recTab==='LR'?LRS:BILLS;if(!src.length){toast('No data','e');return;}var h,rows;if(recTab==='LR'){h=['LR No','Date','Vehicle','Consignor','Consignee','Origin','Destination','Qty','Unit','Weight','Description','Invoice No','GST Paid By','Freight','Delivery','Acknowledgement'];rows=src.map(function(r){return[p3(r.lrNo),r.date,r.vehicle,r.consignor,r.consignee,r.origin,r.dest,r.qty,r.unit,r.weight,r.desc,r.invoice,r.gstby,r.freight,r.delivery,r.ack].map(function(v){return'"'+String(v||'').replace(/"/g,'""')+'"';}).join(',');});}else{h=['Bill No','Date','M/S','LR Entries','Total'];rows=src.map(function(b){return[p3(b.billNo),b.date,b.ms,(b.rows?b.rows.length:0),b.total].map(function(v){return'"'+String(v||'').replace(/"/g,'""')+'"';}).join(',');});}var csv=[h.join(',')].concat(rows).join('\n');var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='Vertex_'+recTab+'s_'+toDay()+'.csv';a.click();toast('CSV downloaded','s');}
+function pDoc(type,num){showPage('print');setTimeout(function(){ge('pt').value=type;renderPSel();ge('ps').value=num;renderP();},120);}
+function renderPSel(){var type=ge('pt').value,sel=ge('ps'),cur=sel.value;sel.innerHTML='<option value="">- Select Document -</option>'+(type==='LR'?LRS.map(function(r){return'<option value="'+r.lrNo+'">'+p3(r.lrNo)+' | '+esc(r.consignor||'')+' | '+fd(r.date)+'</option>';}).join(''):BILLS.map(function(b){return'<option value="'+b.billNo+'">'+p3(b.billNo)+' | '+esc(b.ms||'')+' | '+fd(b.date)+'</option>';}).join(''));if(cur)sel.value=cur;}
+function renderP(){var type=ge('pt').value,num=ge('ps').value,wrap=ge('pw');if(!num){wrap.innerHTML='<div class="emp"><div class="empi">&#128424;</div><p class="empp">Select a document.</p></div>';return;}if(type==='LR'){var r=LRS.find(function(x){return String(x.lrNo)===String(num);});if(!r){wrap.innerHTML='<p style="padding:16px;color:red">LR not found</p>';return;}wrap.innerHTML=buildLR(r);applyLogos(wrap);}else{var bb=BILLS.find(function(x){return String(x.billNo)===String(num);});if(!bb){wrap.innerHTML='<p style="padding:16px;color:red">Bill not found</p>';return;}wrap.innerHTML=buildBill(bb);applyLogos(wrap);}}
+var TERMS=['All consignment is carried entirely at owners risk consignors consignee should take out their own insurance to protect themselves against any or all risks at their description and on their own account.','The Company is not responsible for internal damages to the contents of packages or damages to unpacked goods or damages to perishable articles by deterioration or damages to brittle articles.','The Company is not responsible for the contents of packages if the packages are delivered in the same apparent condition in which the consignor tenders them for dispatch.','No guarantee for weights or contents can be given as far as possible all precaution will be taken against pilferage.','The Company is not responsible of loss or damage to goods by leakage, breakage, evaporation and weather condition strikes, look-outs roads and never hazards or default of start drivers laborers or agents of the company, riots, civil or political disturbances, explosion fire or accident to vehicle by fires to godown where goods are stored.','Delivery to consigns with be effected quickly as possible out the company will not be responsible for delays damages and losses occasioned through conditions beyond its control such road condition and strikes, lock out, civil or political disturbances, explosion weather, fire or accident to vehicle by which the goods are transported.','The Company will be at liberty to transship goods from one vehicle to another at the company position and without incurring any liability for risks or damages assign out of such transshipment.','Timings for departures and arrival are not guaranteed are subject to change without notice at any time.','Freight and other charges if not prepare are payable at the time of delivery the company has a lien goods carried for freight and other charges not paid.','The consignee copy of goods consignment note should be surrender by the consignee or his duly authorized representative at the time of delivery of consignments at destination by the company is at liberty by not bound to effect delivery on triplicate copy of LR Note.','If the consignee does not himself take delivery he must endorse on LR note a request for delivery to be granted to the person whom he wishes.','Consignments marked for the consignee at his own should colliery to SELF from our Branch or Depot at destination if destination if desired deliver can be effected at consignee place on.','The company has the right of re-measurement reclassification of goods before they are delivered and of collecting any amount has may have been omitted or undercharged.','Consignor making false declaration as to the contents descriptions quantities of goods carried will be held liable for any damage, which the carrier may sustain result of such false declaration, consignor will therefore declare his goods correctly and take every precaution to company with the Customs of Government Regulation in fore from time to time carrier will not be responsible if any goods are declared to be contraband and confiscation by any Government.','The Consignor is responsible to obtain and hand over to the company at the time of booking the goods appropriate permits for transport by Road in case of restricted articles in case of failure consignor will be held responsible for consequences arising out of such transport without permit.','The delivery of goods must be taken within 24hrs within the arrival of the goods at the destination failing which detention or storage and handling charges rent per day will be charged unto to be date of its collection from the consignee or consignor. The company is not responsible for given intimation to the consignee about the arrival of the goods the consignee must enquire about the arrival of the goods at the destination.','The Company is not responsible in the event of the goods being detained or seized or confiscated by appropriate government authorities.','Dangerous and inflammable goods will no be carried.','The company reserves the right to refuse on to accept goods for dispatch without assigning any reason.','The company does insure goods if the Consignor wants to insure the goods he must get them insured.','These conditions are subject to change without notice.'];
+function buildLR(r){var s=CFG,h=Math.ceil(TERMS.length/2),c1=TERMS.slice(0,h),c2=TERMS.slice(h);return'<div class="lrp"><div class="lrp-hdr"><div class="lrp-logo-cell"><div class="vlogo lrp-logo-img"></div><div class="lrp-co-text"><div class="lrp-co-name">Vertex logistics</div><div class="lrp-co-sub">Fleet owner &amp; Logistics service all over India</div></div></div><div class="lrp-contact">'+esc(s.addr)+'<br>Mo. +91 '+esc(s.m1)+'<br>Mo. +91 '+esc(s.m2)+'<br>'+esc(s.email)+'</div><div class="lrp-ref-cell"><div class="lrp-ref-row"><span class="lrp-ref-lbl">LR NO. :</span><span class="lrp-ref-val">'+p3(r.lrNo)+'</span></div><div class="lrp-ref-row"><span class="lrp-ref-lbl">DATE :</span><span class="lrp-ref-val">'+fd(r.date)+'</span></div><div class="lrp-ref-row"><span class="lrp-ref-lbl">VEHICLE NO. :</span><span class="lrp-ref-val">'+esc(r.vehicle)+'</span></div></div></div><div class="lrp-copy">CONSIGNOR COPY &nbsp;|&nbsp; CONSIGNEE COPY &nbsp;|&nbsp; DRIVER COPY &nbsp;|&nbsp; ACCOUNT COPY</div><div class="lrp-party"><div class="lrp-pc"><div class="lrp-plbl">Consignor</div><div class="lrp-pval">'+esc(r.consignor)+'</div></div><div class="lrp-pc"><div class="lrp-rl">ORIGIN:</div><div class="lrp-rv">'+esc(r.origin)+'</div><div class="lrp-rl">DESTINATION:</div><div class="lrp-rv">'+esc(r.dest)+'</div></div><div class="lrp-pc"><div class="lrp-plbl">Consignee</div><div class="lrp-pval">'+esc(r.consignee)+'</div></div></div><div class="lrp-gh"><div>QTY</div><div>UNIT</div><div>DESCRIPTION OF GOODS</div><div>TOTAL WEIGHT</div><div class="lrp-ghsplit"><span class="lrp-ghs-l">SALES INVOICE NO: '+esc(r.invoice)+'</span><span class="lrp-ghs-r">FOR VERTEX LOGISTICS,</span></div></div><div class="lrp-gb"><div class="lrp-gc lrp-gv">'+esc(r.qty)+'</div><div class="lrp-gc lrp-gv">'+esc(r.unit)+'</div><div class="lrp-gc lrp-gv">'+esc(r.desc)+'</div><div class="lrp-gc lrp-gv">'+esc(r.weight)+'</div><div class="lrp-gc lrp-infocell"><div class="lrp-ir"><div class="lrp-irow"><span class="lrp-ilbl">GST PAID BY:</span><span class="lrp-ival">'+esc(r.gstby)+'</span></div><div class="lrp-irow"><span class="lrp-ilbl">FRIEGHT DETAILS:</span><span class="lrp-ival">'+esc(r.freight)+'</span></div><div class="lrp-irow"><span class="lrp-ilbl">DELIVERY LOCATION:</span><span class="lrp-ival">'+esc(r.delivery)+'</span></div><div class="lrp-irow"><span class="lrp-ilbl">CONSIGNEE ACKNOWLEDGEMENT:</span><span class="lrp-ival">'+esc(r.ack)+'</span></div></div><div class="lrp-sigcol"></div></div></div><div class="lrp-terms"><div class="lrp-tt">Terms and Conditions : Subject to Ahmedabad Jurisdiction</div><div class="lrp-tg"><div>'+c1.map(function(t,i){return'<div class="lrp-ti">'+(i+1)+'. '+t+'</div>';}).join('')+'</div><div>'+c2.map(function(t,i){return'<div class="lrp-ti">'+(i+h+1)+'. '+t+'</div>';}).join('')+'</div></div></div></div>';}
+function buildBill(b){var s=CFG,rows=b.rows||[],total=rows.reduce(function(sum,r){return sum+(parseFloat(r.amount)||0);},0);return'<div class="bp"><div class="bp-bar"></div><div class="bph"><div class="vlogo bph-logo"></div><div class="bpco"><div class="bpcn">'+esc(s.name)+'</div><div class="bpcs">'+esc(s.sub)+'</div><div class="bpca">'+esc(s.addr)+'<br>M. +91 '+esc(s.m1)+', +91 '+esc(s.m2)+'</div><div class="bpcp">E-mail: '+esc(s.email)+'<br>PAN NO.: '+esc(s.pan)+'</div></div></div><div class="bphr"></div><div class="bptr"><div><div class="bpml">M/S.:</div><div class="bpmv">'+esc(b.ms)+'</div></div><div class="bprf"><div class="bprr"><span class="bprl">Bill No.:</span><span class="bprv">'+p3(b.billNo)+'</span></div><div class="bprr"><span class="bprl">Date:</span><span class="bprv">'+fd(b.date)+'</span></div></div></div><table class="bptbl"><thead><tr><th style="width:44px">LR No.</th><th style="width:62px">Date</th><th style="width:84px">Vehicle No.</th><th>From</th><th>To</th><th style="width:66px">No. of Articles</th><th style="width:96px">Loading/Unloading Charges</th><th style="width:76px">Amount Rs.</th></tr></thead><tbody>'+rows.map(function(row){return'<tr><td class="c">'+esc(row.lrno)+'</td><td class="c">'+(row.date?fd(row.date):'')+'</td><td class="c">'+esc(row.vehicle)+'</td><td>'+esc(row.from)+'</td><td>'+esc(row.to)+'</td><td class="c">'+esc(row.articles)+'</td><td class="r">'+(row.charges?'Rs.'+parseFloat(row.charges).toFixed(2):'')+'</td><td class="r">'+(row.amount?'Rs.'+parseFloat(row.amount).toFixed(2):'')+'</td></tr>';}).join('')+Array(Math.max(0,11-rows.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('')+'<tr class="str"><td colspan="3"></td><td colspan="2" style="text-align:right">Total</td><td colspan="2"></td><td class="r">Rs.'+total.toFixed(2)+'</td></tr><tr class="ttr"><td colspan="2">Rs. in words:</td><td colspan="4" style="font-style:italic;font-weight:400">'+n2w(total)+'</td><td style="text-align:right">Grand Total:</td><td class="r">Rs.'+total.toFixed(2)+'</td></tr></tbody></table><div class="bpft"><div class="bpbk"><strong>Bank: '+esc(s.bank)+'</strong><br>A/C No.: '+esc(s.acc)+'<br>IFSC: '+esc(s.ifsc)+'<div class="bpnt">Note: GST Payable by recipient if service under RCM</div></div><div class="bpsg"><span style="font-size:10px;font-weight:800">For, '+esc(s.name)+'</span><div class="bpsl">Authorised Signature</div></div></div><div class="bptag">&lsquo;Your trusted logistics ally&rsquo;</div><div class="bp-bar"></div></div>';}
+function loadSUI(){function fv(id,val){var e=ge(id);if(e)e.value=val||'';}fv('fb-k',CFG.apiKey);fv('fb-d',CFG.authDomain);fv('fb-p',CFG.projectId);fv('fb-a',CFG.appId);fv('s-nm',CFG.name);fv('s-sb',CFG.sub);fv('s-ad',CFG.addr);fv('s-m1',CFG.m1);fv('s-m2',CFG.m2);fv('s-em',CFG.email);fv('s-pn',CFG.pan);fv('s-bk',CFG.bank);fv('s-ac',CFG.acc);fv('s-if',CFG.ifsc);ge('s-lr').value=CFG.startLR||1;ge('s-bl').value=CFG.startBill||16;if(CFG.apiKey&&CFG.projectId)setCS('fb-st',true,'Connected to Firebase.');}
+function syncSUI(){function fv(id,val){var e=ge(id);if(e)e.value=val||'';}fv('fb-k',CFG.apiKey);fv('fb-d',CFG.authDomain);fv('fb-p',CFG.projectId);fv('fb-a',CFG.appId);}
+function saveComp(){CFG.name=ge('s-nm').value;CFG.sub=ge('s-sb').value;CFG.addr=ge('s-ad').value;CFG.m1=ge('s-m1').value;CFG.m2=ge('s-m2').value;CFG.email=ge('s-em').value;CFG.pan=ge('s-pn').value;CFG.bank=ge('s-bk').value;CFG.acc=ge('s-ac').value;CFG.ifsc=ge('s-if').value;CFG.startLR=parseInt(ge('s-lr').value)||1;CFG.startBill=parseInt(ge('s-bl').value)||16;LS.s('vtxA',CFG);toast('Settings saved','s');}
+function updateAC(){function setDL(id,vals){var dl=ge(id);if(!dl)return;var u=[];vals.forEach(function(v){if(v&&u.indexOf(v)===-1)u.push(v);});dl.innerHTML=u.map(function(v){return'<option value="'+esc(v)+'">';}).join('');}setDL('dl-cr',LRS.map(function(r){return r.consignor;}));setDL('dl-ce',LRS.map(function(r){return r.consignee;}));setDL('dl-vh',LRS.map(function(r){return r.vehicle;}));setDL('dl-c1',LRS.map(function(r){return r.origin;}));setDL('dl-c2',LRS.map(function(r){return r.dest;}));}
+function setCS(id,ok,msg){var e=ge(id);if(!e)return;e.style.display='block';e.className='cst '+(ok?'cso':'csf');e.textContent=msg;}
+function setSd(s){var d=ge('sdot'),l=ge('slbl');d.className='dot'+(s==='off'?' off':s==='bl'?' bl':'');l.textContent=s==='bl'?'Sync...':s==='off'?'Offline':'Live';}
+function showMo(title,msg,cb){ge('mt').textContent=title;ge('mm').textContent=msg;moCallback=cb;ge('mbg').classList.add('open');}
+function closeMo(){ge('mbg').classList.remove('open');moCallback=null;}
+var toastTimer;
+function toast(msg,type){var e=ge('toast');e.textContent=msg;e.className='show '+(type||'i');clearTimeout(toastTimer);toastTimer=setTimeout(function(){e.classList.remove('show');},3200);}
+function setText(id,v){var e=ge(id);if(e)e.textContent=v;}
+function toDay(){return new Date().toISOString().split('T')[0];}
+function fd(iso){if(!iso)return'-';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function fn(n){return(parseFloat(n)||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function p3(n){return String(n||0).padStart(3,'0');}
+function n2w(n){var a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];var b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];function w(x){if(!x)return'';if(x<20)return a[x]+' ';if(x<100)return b[Math.floor(x/10)]+' '+(x%10?a[x%10]+' ':'');if(x<1000)return a[Math.floor(x/100)]+' Hundred '+(x%100?w(x%100):'');if(x<100000)return w(Math.floor(x/1000))+'Thousand '+(x%1000?w(x%1000):'');if(x<10000000)return w(Math.floor(x/100000))+'Lakh '+(x%100000?w(x%100000):'');return w(Math.floor(x/10000000))+'Crore '+(x%10000000?w(x%10000000):'');}var int=Math.floor(n),dec=Math.round((n-int)*100);return w(int).trim()+' Rupees'+(dec?' and '+w(dec).trim()+' Paise':'')+' Only';}
+document.addEventListener('DOMContentLoaded',function(){
+  ge('ov-connect-btn').addEventListener('click',function(){doConnect({apiKey:ge('ov-k').value.trim(),authDomain:ge('ov-d').value.trim(),projectId:ge('ov-p').value.trim(),appId:ge('ov-a').value.trim()},'ov-st');});
+  ge('test-fb-btn').addEventListener('click',function(){doConnect({apiKey:ge('fb-k').value.trim(),authDomain:ge('fb-d').value.trim(),projectId:ge('fb-p').value.trim(),appId:ge('fb-a').value.trim()},'fb-st');});
+  ge('sync-btn').addEventListener('click',function(){loadAll(true);});
+  ge('sync-now-btn').addEventListener('click',function(){loadAll(true);});
+  ge('save-comp-btn').addEventListener('click',saveComp);
+  ge('tab-dashboard').addEventListener('click',function(){showPage('dashboard');});
+  ge('tab-lr').addEventListener('click',function(){if(!CLR)newDoc('LR');else showPage('lr');});
+  ge('tab-bill').addEventListener('click',function(){if(!CBILL)newDoc('BILL');else showPage('bill');});
+  ge('tab-records').addEventListener('click',function(){showPage('records');});
+  ge('tab-print').addEventListener('click',function(){showPage('print');});
+  ge('tab-settings').addEventListener('click',function(){showPage('settings');});
+  ge('dash-new-lr').addEventListener('click',function(){newDoc('LR');});
+  ge('dash-new-bill').addEventListener('click',function(){newDoc('BILL');});
+  ge('lr-no').addEventListener('input',function(){var v=parseInt(this.value);if(!isNaN(v)&&v>0){CLR=v;ge('lrbdg').textContent='LR # '+p3(v);}});
+  ge('lr-new-btn').addEventListener('click',function(){newDoc('LR');});
+  ge('lr-sv').addEventListener('click',function(){saveLR(false);});
+  ge('lr-svpr').addEventListener('click',function(){saveLR(true).then(function(d){if(!d)return;showPage('print');setTimeout(function(){ge('pt').value='LR';ge('ps').value=d.lrNo;renderP();},150);});});
+  ge('bill-no').addEventListener('input',function(){var v=parseInt(this.value);if(!isNaN(v)&&v>0){CBILL=v;ge('billbdg').textContent='BILL # '+p3(v);}});
+  ge('bill-new-btn').addEventListener('click',function(){newDoc('BILL');});
+  ge('add-row-btn').addEventListener('click',addBillRow);
+  ge('bill-sv').addEventListener('click',function(){saveBill(false);});
+  ge('bill-svpr').addEventListener('click',function(){saveBill(true).then(function(d){if(!d)return;showPage('print');setTimeout(function(){ge('pt').value='BILL';renderPSel();ge('ps').value=d.billNo;renderP();},150);});});
+  ge('rt-lr').addEventListener('click',function(){recTab='LR';recPg=0;ge('rt-lr').style.background='rgba(255,255,255,.3)';ge('rt-bill').style.background='';renderRec();});
+  ge('rt-bill').addEventListener('click',function(){recTab='BILL';recPg=0;ge('rt-bill').style.background='rgba(255,255,255,.3)';ge('rt-lr').style.background='';renderRec();});
+  ge('rq').addEventListener('input',function(){recPg=0;renderRec();});
+  ge('pg-prev').addEventListener('click',function(){if(recPg>0){recPg--;renderRec();ge('cnt').scrollTop=0;}});
+  ge('pg-next').addEventListener('click',function(){recPg++;renderRec();ge('cnt').scrollTop=0;});
+  ge('rec-new-lr').addEventListener('click',function(){newDoc('LR');});
+  ge('rec-new-bill').addEventListener('click',function(){newDoc('BILL');});
+  ge('exp-csv-btn').addEventListener('click',expCSV);
+  ge('rec-list').addEventListener('click',function(e){var t=e.target;if(t.dataset.plr)pDoc('LR',parseInt(t.dataset.plr));else if(t.dataset.pbill)pDoc('BILL',parseInt(t.dataset.pbill));else if(t.dataset.elr)edLR(t.dataset.elr);else if(t.dataset.ebill)edBill(t.dataset.ebill);else if(t.dataset.dlr)delDoc('LR',t.dataset.dlr,parseInt(t.dataset.dnum));else if(t.dataset.dbill)delDoc('BILL',t.dataset.dbill,parseInt(t.dataset.dnum));});
+  ge('rlr').addEventListener('click',function(e){if(e.target.dataset.plr)pDoc('LR',parseInt(e.target.dataset.plr));});
+  ge('rbill').addEventListener('click',function(e){if(e.target.dataset.pbill)pDoc('BILL',parseInt(e.target.dataset.pbill));});
+  ge('pt').addEventListener('change',renderPSel);
+  ge('ps').addEventListener('change',renderP);
+  ge('preview-btn').addEventListener('click',renderP);
+  ge('print-btn').addEventListener('click',function(){window.print();});
+  ge('mo-ok').addEventListener('click',function(){if(moCallback)moCallback();closeMo();});
+  ge('mo-cancel').addEventListener('click',closeMo);
+  applyLogos();loadSUI();initRows();ge('lr-dt').value=toDay();ge('bill-dt').value=toDay();
+  if(CFG.apiKey&&CFG.projectId){ge('ov').classList.add('hidden');if(initFB(CFG))loadAll(false);else offUI();}else offUI();
+});
+})();
+</script>
+</body>
+</html>
